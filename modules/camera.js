@@ -2,19 +2,30 @@ import removeNode from './removeNode.js';
 
 //ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 
-const UNIQUE = (+new Date()).toString(32);
-const DATA_UNIQUE = 'data-video-created-' + UNIQUE;
-
 const constraintsDefault = {
   audio: false,
   video: {
     facingMode: 'user', //ou a traseira 'environment'
-    width: { min: 1024, max: 1920 },
-    height: { min: 576, max: 1080 },
+    width: { min: 1024, ideal: 1920, max: 3840 },
+    height: { min: 576, ideal: 1080, max: 2160 },
   },
 };
 
-export const loadCamera = (target = document.body, constraints, reject) => {
+const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
+
+/**
+ *
+ * @param {HTMLVideoElement} videoElement
+ * @param {MediaStreamConstraints} constraints
+ * @param {(error:string)=>void} reject   error: NotIsHTMLVideoElement, NotSupportMediaDevicesError, and https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#Exceptions
+ * @return {void}
+ */
+export const loadCamera = (videoElement, constraints, reject) => {
+  if (!isHTMLVideoElement(videoElement)) {
+    reject('NotIsHTMLVideoElement');
+    return;
+  }
+
   if (constraints) {
     constraints = {
       ...constraintsDefault,
@@ -33,21 +44,13 @@ export const loadCamera = (target = document.body, constraints, reject) => {
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
-      let video = document.querySelector(`[${DATA_UNIQUE}]`);
-      if (!video) {
-        video = document.createElement('video');
-        video.style.width = '1024px';
-        video.setAttribute(DATA_UNIQUE, '');
-        video.setAttribute('autoplay', '');
-        video.setAttribute('muted', '');
-        video.setAttribute('playsinline', '');
-        video.addEventListener('loadeddata', (event) => {
-          console.log(event);
-        });
-        target.appendChild(video);
-      }
-
-      video.srcObject = stream;
+      videoElement.style.width = '1024px';
+      videoElement.setAttribute('autoplay', '');
+      videoElement.setAttribute('muted', '');
+      videoElement.setAttribute('playsinline', '');
+      // possibilidade de usar events
+      videoElement.addEventListener('loadeddata', console.log);
+      videoElement.srcObject = stream;
     })
     .catch((error) => {
       // ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#Exceptions
@@ -56,7 +59,60 @@ export const loadCamera = (target = document.body, constraints, reject) => {
     });
 };
 
-export const removeCamera = () => {
-  const video = document.querySelector(`[${DATA_UNIQUE}]`);
-  removeNode(video);
+//[ref] https://gist.github.com/VMBindraban/1be9cd5eceb347bef860
+export const snapshotResize = (video, width, height) => {
+  let canvas = document.createElement('canvas'),
+    ctx = canvas.getContext('2d'),
+    xStart = 0,
+    yStart = 0,
+    aspectRadio,
+    newWidth,
+    newHeight;
+
+  canvas.width = width;
+  canvas.height = height;
+
+  aspectRadio = video.clientHeight / video.clientWidth;
+
+  if (video.clientHeight < video.clientWidth) {
+    //horizontal
+    aspectRadio = video.clientWidth / video.clientHeight;
+    (newHeight = height), (newWidth = aspectRadio * height);
+    xStart = -(newWidth - width) / 2;
+  } else {
+    //vertical
+    (newWidth = width), (newHeight = aspectRadio * width);
+    yStart = -(newHeight - height) / 2;
+  }
+
+  ctx.drawImage(video, xStart, yStart, newWidth, newHeight);
+
+  return canvas.toDataURL('image/jpeg');
+};
+
+export const snapShot = (videoElement, width, height) => {
+  if (!isHTMLVideoElement(videoElement)) {
+    return null;
+  }
+
+  const videoWidth = videoElement.clientWidth;
+  const videoHeight = videoElement.clientHeight;
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  if (height < width) {
+    canvas.height = height;
+    canvas.width = height * (videoWidth / videoHeight);
+  } else {
+    canvas.width = width;
+    canvas.height = width * (videoHeight / videoWidth);
+  }
+
+  context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+  // modo ideal para promise/observable, e poder usar o URL.createObjectURL
+  // canvas.toBlob((blob) => {
+  //   console.log(blob);
+  // }, 'image/jpeg');
+  return canvas.toDataURL('image/jpeg');
 };
