@@ -1,7 +1,8 @@
+import alert from './alert.js';
 import removeNode from './removeNode.js';
 
 //ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-
+const ID = (+new Date()).toString(36);
 const constraintsDefault = {
   audio: false,
   video: {
@@ -9,6 +10,10 @@ const constraintsDefault = {
     width: { min: 1024, ideal: 1920, max: 3840 },
     height: { min: 576, ideal: 1080, max: 2160 },
   },
+};
+
+const alertOptions = {
+  id: 'alert',
 };
 
 const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
@@ -39,19 +44,32 @@ export const loadCamera = (videoElement, constraints, reject) => {
   console.log('constraints:', constraints); //debug
 
   //permission, support
-  if (!navigator.mediaDevices.getUserMedia) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     reject('NotSupportMediaDevicesError');
   }
 
+  alert('carregando câmera...', alertOptions);
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
-      videoElement.style.width = '1024px';
-      videoElement.setAttribute('autoplay', '');
-      videoElement.setAttribute('muted', '');
-      videoElement.setAttribute('playsinline', '');
-      // possibilidade de usar events
-      videoElement.addEventListener('loadeddata', console.log);
+      const attrDataId = 'data-video';
+      if (!videoElement.getAttribute(attrDataId)) {
+        videoElement.setAttribute(attrDataId, ID);
+        videoElement.setAttribute('autoplay', '');
+        videoElement.setAttribute('muted', '');
+        videoElement.setAttribute('playsinline', '');
+        // possibilidade de usar events
+        videoElement.addEventListener('loadeddata', () => {
+          alert('loadeddata', alertOptions);
+        });
+        videoElement.addEventListener('loadedmetadata', () => {
+          alert('loadedmetadata', alertOptions);
+        });
+        videoElement.addEventListener('loadstart', () => {
+          alert('loadstart', alertOptions);
+        });
+      }
+
       videoElement.srcObject = stream;
     })
     .catch((error) => {
