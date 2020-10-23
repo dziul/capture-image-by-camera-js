@@ -2,19 +2,6 @@ body {
   margin: 0;
 }
 
-#video {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  height: 200px;
-}
-#video video {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  top: 50%;
-}
-
 #alert {
   position: fixed;
   bottom: 0;
@@ -37,4 +24,8 @@ body {
   left: 0;
   margin: 24px;
   z-index: 2;
+}
+
+#video {
+  max-width: 400px;
 }
