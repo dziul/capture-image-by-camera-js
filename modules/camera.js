@@ -52,6 +52,7 @@ export const loadCamera = (videoElement, constraints, reject) => {
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
+      console.log('stream', stream);
       const attrDataId = 'data-video';
       if (!videoElement.getAttribute(attrDataId)) {
         videoElement.setAttribute(attrDataId, ID);
@@ -59,8 +60,9 @@ export const loadCamera = (videoElement, constraints, reject) => {
         videoElement.setAttribute('muted', '');
         videoElement.setAttribute('playsinline', '');
         // possibilidade de usar events
-        videoElement.addEventListener('loadeddata', () => {
+        videoElement.addEventListener('loadeddata', (event) => {
           alert('loadeddata', alertOptions);
+          alert(`width: ${event.target.clientWidth}, height: ${event.target.clientHeight}`, alertOptions);
         });
         videoElement.addEventListener('loadedmetadata', () => {
           alert('loadedmetadata', alertOptions);
