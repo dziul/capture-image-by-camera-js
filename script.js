@@ -13,13 +13,13 @@ const loadError = (error) => {
   const options = { id: 'alert', timeout: 5000 };
   switch (error) {
     case 'NotSupportMediaDevicesError':
-      alert('Nao tem suporte', options);
+      alert(`[${error}]Nao tem suporte`, options);
       break;
     case 'NotAllowedError':
-      alert('camera bloqueada ', options);
+      alert(`[${error}]camera bloqueada`, options);
       break;
     default:
-      alert('algo deu errado ', options);
+      alert(`[${error}]algo deu errado`, options);
       break;
   }
 };
