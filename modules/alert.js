@@ -1,7 +1,7 @@
 import removeNode from './removeNode.js';
 
 const optionsDefault = {
-  timeout: 2000,
+  timeout: 5000,
   id: 'alert-' + new Date().getTime().toString(36),
 };
 
