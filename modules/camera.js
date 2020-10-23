@@ -36,6 +36,8 @@ export const loadCamera = (videoElement, constraints, reject) => {
     constraints = constraintsDefault;
   }
 
+  console.log('constraints:', constraints); //debug
+
   //permission, support
   if (!navigator.mediaDevices.getUserMedia) {
     reject('NotSupportMediaDevicesError');
