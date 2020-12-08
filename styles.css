@@ -7,6 +7,9 @@ body {
   right: 0;
   top: 0;
 }
+#alert a {
+  color: black;
+}
 
 #alert div {
   margin-bottom: 8px;
