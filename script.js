@@ -47,7 +47,7 @@ const onClick = () => {
   snapShot(elementVideo, 1920, 1080).then((response) => {
     changeButtonSnapShot();
     console.log('snapShot', response);
-    alert(`<a href="${response.blobUrl}" target="_blank">image generated</a>`, optionsLoadError);
+    alert(`<a href="${response.blobUrl}" target="_blank">${response.filename}</a>`, optionsLoadError);
     elementSnapshotPreview.style.backgroundImage = `url(${response.blobUrl})`;
     changeElementSnapshotPreviewAriaHidden(false);
   });
