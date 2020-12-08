@@ -8,19 +8,21 @@
     <meta name="theme-color" content="#1e2327" />
   </head>
   <body>
-    <div class="actions">
-      <button id="button-load">ativar camera frontal</button>
-      <button id="button-load-back">ativar camera traseira</button>
-      <button id="button-snap">tirar foto</button>
-    </div>
-    <div>
-      <video id="video"></video>
-    </div>
+    <div class="dialog" aria-modal="true">
+      <div class="dialog-content" role="document">
+        <div class="snapshot">
+          <span class="snapshot-mask"></span>
+          <video class="snapshot-video"></video>
+          <div class="snapshot-preview"></div>
+        </div>
 
-    <p>resize com preenchimento</p>
-    <div id="preview"></div>
-    <p>resize proporcional</p>
-    <div id="preview-alt"></div>
+        <div class="dialog-actions">
+          <button class="dialog-actions-button button-snap">tirar foto</button>
+          <button class="dialog-actions-button button-load">ativar camera frontal</button>
+          <button class="dialog-actions-button button-load-back">ativar camera traseira</button>
+        </div>
+      </div>
+    </div>
 
     <script src="./script.js" type="module"></script>
   </body>
