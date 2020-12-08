@@ -1,7 +1,7 @@
 import alert from './alert.js';
+import uuid from './uniqueId.js';
 
 //ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
-const ID = (+new Date()).toString(36);
 const constraintsDefault = {
   audio: false,
   video: {
@@ -17,7 +17,22 @@ const alertOptions = {
 };
 
 const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
+
+const mimeType = 'image/jpeg';
+const getId = () => uuid(6);
+
 let streamed = {};
+let videoElementClass = '';
+
+//fechar camera, caso esteja ativa
+export const closeCamera = () => {
+  if ('getTracks' in streamed) {
+    streamed.getTracks().forEach((track) => {
+      track.stop();
+    });
+  }
+};
+
 /**
  *
  * @param {HTMLVideoElement} videoElement
@@ -31,6 +46,8 @@ export const loadCamera = (videoElement, constraints, reject) => {
     return;
   }
 
+  closeCamera();
+
   if (constraints) {
     constraints = {
       ...constraintsDefault,
@@ -43,13 +60,6 @@ export const loadCamera = (videoElement, constraints, reject) => {
 
   console.log('constraints', constraints);
 
-  //fechar camera, caso esteja ativa
-  if ('getTracks' in streamed) {
-    streamed.getTracks().forEach((track) => {
-      track.stop();
-    });
-  }
-
   //permission, support
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     reject('NotSupportMediaDevicesError');
@@ -60,18 +70,20 @@ export const loadCamera = (videoElement, constraints, reject) => {
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
+      const attrDataId = 'data-id';
       console.log('stream', stream);
       streamed = stream;
-      const attrDataId = 'data-video';
       if (!videoElement.getAttribute(attrDataId)) {
-        videoElement.setAttribute(attrDataId, ID);
+        videoElement.setAttribute(attrDataId, getId());
         videoElement.setAttribute('autoplay', '');
         videoElement.setAttribute('muted', '');
         videoElement.setAttribute('playsinline', '');
         // possibilidade de usar events
         videoElement.addEventListener('loadeddata', (event) => {
           alert('loadeddata', alertOptions);
+
           alert(`width: ${event.target.clientWidth}, height: ${event.target.clientHeight}`, alertOptions);
+          event.target.setAttribute('class', videoElementClass);
         });
         videoElement.addEventListener('loadedmetadata', () => {
           alert('loadedmetadata', alertOptions);
@@ -82,6 +94,8 @@ export const loadCamera = (videoElement, constraints, reject) => {
       }
 
       videoElement.srcObject = stream;
+      videoElementClass = videoElement.getAttribute('class');
+      videoElement.removeAttribute('class');
     })
     .catch((error) => {
       // ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#Exceptions
@@ -90,60 +104,77 @@ export const loadCamera = (videoElement, constraints, reject) => {
     });
 };
 
-//[ref] https://gist.github.com/VMBindraban/1be9cd5eceb347bef860
-export const snapshotResize = (video, width, height) => {
-  let canvas = document.createElement('canvas'),
-    ctx = canvas.getContext('2d'),
-    xStart = 0,
-    yStart = 0,
-    aspectRadio,
-    newWidth,
-    newHeight;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  aspectRadio = video.clientHeight / video.clientWidth;
-
-  if (video.clientHeight < video.clientWidth) {
-    //horizontal
-    aspectRadio = video.clientWidth / video.clientHeight;
-    (newHeight = height), (newWidth = aspectRadio * height);
-    xStart = -(newWidth - width) / 2;
-  } else {
-    //vertical
-    (newWidth = width), (newHeight = aspectRadio * width);
-    yStart = -(newHeight - height) / 2;
-  }
-
-  ctx.drawImage(video, xStart, yStart, newWidth, newHeight);
-
-  return canvas.toDataURL('image/jpeg');
-};
-
 export const snapShot = (videoElement, width, height) => {
   if (!isHTMLVideoElement(videoElement)) {
     return null;
   }
 
-  const videoWidth = videoElement.clientWidth;
-  const videoHeight = videoElement.clientHeight;
   const canvas = document.createElement('canvas');
+  canvas.height = height;
+  canvas.width = width;
   const context = canvas.getContext('2d');
 
-  if (height < width) {
-    canvas.height = height;
-    canvas.width = height * (videoWidth / videoHeight);
-  } else {
-    canvas.width = width;
-    canvas.height = width * (videoHeight / videoWidth);
-  }
-
   context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-  // modo ideal para promise/observable, e poder usar o URL.createObjectURL
-  // canvas.toBlob((blob) => {
-  //   console.log(blob);
-  // }, 'image/jpeg');
-  return canvas.toDataURL('image/jpeg');
+  return canvasToBlob(canvas);
 };
+
+export const blobToFile = (blob, filename) => {
+  return new File([blob], filename, { type: blob.type, lastModified: +new Date() });
+};
+
+//solução que não dependa do .toBlob (no qual ainda não tem um suporte OK)
+export const canvasToBlob = (canvasElement) => {
+  return new Promise((resolve) => {
+    const { width, height } = canvasElement;
+    const dataUrl = canvasElement.toDataURL(mimeType);
+    const dataString = dataUrl.split(',').pop();
+    const bytesArraySource = atob(dataString)
+      .split('')
+      .map((char) => char.charCodeAt(0));
+    const sizeBytes = bytesArraySource.length;
+    const blob = new Blob([Uint8Array.from(bytesArraySource)], { type: mimeType });
+    const extension = mimeType.split('/').pop();
+    const file = blobToFile(blob, `${getId()}.${extension}`);
+    resolve({
+      width,
+      height,
+      dataUrl,
+      sizeBytes,
+      file,
+      mimeType,
+      sizeMegaBytes: sizeBytes / Math.pow(1024, 2),
+      blobUrl: window.URL.createObjectURL(blob),
+    });
+  });
+};
+
+//[ref] https://gist.github.com/VMBindraban/1be9cd5eceb347bef860
+// export const snapshotResize = (video, width, height) => {
+//   let canvas = document.createElement('canvas'),
+//     ctx = canvas.getContext('2d'),
+//     xStart = 0,
+//     yStart = 0,
+//     aspectRadio,
+//     newWidth,
+//     newHeight;
+
+//   canvas.width = width;
+//   canvas.height = height;
+
+//   aspectRadio = video.clientHeight / video.clientWidth;
+
+//   if (video.clientHeight < video.clientWidth) {
+//     //horizontal
+//     aspectRadio = video.clientWidth / video.clientHeight;
+//     (newHeight = height), (newWidth = aspectRadio * height);
+//     xStart = -(newWidth - width) / 2;
+//   } else {
+//     //vertical
+//     (newWidth = width), (newHeight = aspectRadio * width);
+//     yStart = -(newHeight - height) / 2;
+//   }
+
+//   ctx.drawImage(video, xStart, yStart, newWidth, newHeight);
+
+//   return canvas.toDataURL('image/jpeg');
+// };
