@@ -45,7 +45,7 @@ const onClick = () => {
     return changeButtonSnapShot();
   }
 
-  snapShot(elementVideo, 1920, 1080).then((response) => {
+  snapShot(elementVideo).then((response) => {
     changeButtonSnapShot();
     console.log('snapShot', response);
     alert(`<a href="${response.blobUrl}" target="_blank">${response.filename}</a>`, optionsLoadError);
