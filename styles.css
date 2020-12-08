@@ -4,8 +4,8 @@ body {
 
 #alert {
   position: fixed;
-  bottom: 0;
   right: 0;
+  top: 0;
 }
 
 #alert div {
@@ -18,14 +18,61 @@ body {
   background: yellow;
 }
 
-.actions {
+.dialog {
   position: fixed;
-  top: 0;
   left: 0;
-  margin: 24px;
-  z-index: 2;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  background: rgba(0, 0, 0, 0.7);
 }
 
-#video {
-  /* max-width: 400px; */
+.dialog-content {
+  height: 100%;
+  max-width: 768px;
+  margin: 0 auto;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.snapshot {
+  height: 320px;
+  background: green;
+  position: relative;
+  flex: 1 1 auto;
+}
+.snapshot-mask {
+  flex: 1 1 auto;
+  margin: 12%;
+  border-radius: 8px;
+  box-shadow: 0 0 0 500px rgba(0, 0, 0, 0.7);
+  z-index: 2;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
+.snapshot-video {
+  object-fit: cover;
+}
+
+.dialog-actions {
+  padding: 24px 12px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.dialog-actions-button {
+  padding: 16px 24px;
+  flex: 1;
+  margin: 0 4px;
+}
+
+.dialog-actions-button.button-snap {
+  width: 100%;
+  flex: 1 1 auto;
+  margin-bottom: 8px;
 }
