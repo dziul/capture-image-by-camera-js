@@ -35,10 +35,13 @@ const changeButtonSnapShot = () => {
   buttonSnapShot.textContent = buttonSnapShot.getAttribute(attrTextNext);
   buttonSnapShot.setAttribute(attrTextNext, previousText);
   hasSnaped = !hasSnaped;
+
+  buttonLoad.disabled = hasSnaped;
+  buttonCloseCamera.disabled = hasSnaped;
+  buttonLoadBack.disabled = hasSnaped;
 };
 
 const onClick = () => {
-  console.log(hasSnaped);
   if (hasSnaped) {
     changeElementSnapshotPreviewAriaHidden(true);
     return changeButtonSnapShot();
@@ -64,4 +67,6 @@ buttonLoadBack.addEventListener('click', () => {
   });
 });
 buttonSnapShot.addEventListener('click', onClick);
-buttonCloseCamera.addEventListener('click', closeCamera);
+buttonCloseCamera.addEventListener('click', () => {
+  closeCamera();
+});
