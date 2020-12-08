@@ -57,23 +57,45 @@ body {
 }
 
 .snapshot-video {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
   object-fit: cover;
 }
 
+.snapshot-preview {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center center;
+}
+.snapshot-preview[aria-hidden='true'] {
+  display: none;
+}
+
 .dialog-actions {
-  padding: 24px 12px;
+  padding: 24px 12px 16px; /*24px 16x*/
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
 }
 .dialog-actions-button {
-  padding: 16px 24px;
+  padding: 8px 16px;
   flex: 1;
-  margin: 0 4px;
+  margin: 0 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: #ddd;
 }
 
 .dialog-actions-button.button-snap {
-  width: 100%;
-  flex: 1 1 auto;
-  margin-bottom: 8px;
+  background: blueviolet;
+  color: #fff;
+  white-space: nowrap;
 }
