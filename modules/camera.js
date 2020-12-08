@@ -1,5 +1,5 @@
 import alert from './alert.js';
-import uuid from './uniqueId.js';
+import { hash } from './uniqueId.js';
 
 //ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 const constraintsDefault = {
@@ -19,7 +19,7 @@ const alertOptions = {
 const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
 
 const mimeType = 'image/jpeg';
-const getId = () => uuid(6);
+const getId = () => hash(6);
 
 let streamed = {};
 let videoElementClass = '';
