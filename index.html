@@ -13,13 +13,21 @@
         <div class="snapshot">
           <span class="snapshot-mask"></span>
           <video class="snapshot-video"></video>
-          <div class="snapshot-preview"></div>
+          <span
+            aria-hidden="true"
+            aria-label="prévia da captura de imagem"
+            role="img"
+            class="snapshot-preview"
+          ></span>
         </div>
 
         <div class="dialog-actions">
-          <button class="dialog-actions-button button-snap">tirar foto</button>
-          <button class="dialog-actions-button button-load">ativar camera frontal</button>
-          <button class="dialog-actions-button button-load-back">ativar camera traseira</button>
+          <button class="dialog-actions-button button-load">camera frontal</button>
+          <button class="dialog-actions-button button-load-back">camera traseira</button>
+          <button class="dialog-actions-button button-close">desativar</button>
+          <button class="dialog-actions-button button-snap" data-next-text="tirar novamente">
+            tirar foto
+          </button>
         </div>
       </div>
     </div>
