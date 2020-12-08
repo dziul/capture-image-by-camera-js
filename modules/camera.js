@@ -19,11 +19,11 @@ const alertOptions = {
 const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
 
 const mimeType = 'image/jpeg';
-const getId = () => hash(6);
+const getId = () => hash(6, 3);
 
 let streamed = {};
 let videoElementClass = '';
-
+let widthCamera, heightCamera;
 //fechar camera, caso esteja ativa
 export const closeCamera = () => {
   if ('getTracks' in streamed) {
@@ -81,8 +81,9 @@ export const loadCamera = (videoElement, constraints, reject) => {
         // possibilidade de usar events
         videoElement.addEventListener('loadeddata', (event) => {
           alert('loadeddata', alertOptions);
-
-          alert(`width: ${event.target.clientWidth}, height: ${event.target.clientHeight}`, alertOptions);
+          widthCamera = event.target.clientWidth;
+          heightCamera = event.target.clientHeight;
+          alert(`width: ${widthCamera}, height: ${heightCamera}`, alertOptions);
           event.target.setAttribute('class', videoElementClass);
         });
         videoElement.addEventListener('loadedmetadata', () => {
@@ -104,14 +105,14 @@ export const loadCamera = (videoElement, constraints, reject) => {
     });
 };
 
-export const snapShot = (videoElement, width, height) => {
+export const snapShot = (videoElement) => {
   if (!isHTMLVideoElement(videoElement)) {
     return null;
   }
 
   const canvas = document.createElement('canvas');
-  canvas.height = height;
-  canvas.width = width;
+  canvas.height = heightCamera;
+  canvas.width = widthCamera;
   const context = canvas.getContext('2d');
 
   context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
