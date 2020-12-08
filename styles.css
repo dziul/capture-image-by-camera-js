@@ -41,6 +41,7 @@ body {
   background: green;
   position: relative;
   flex: 1 1 auto;
+  overflow: hidden;
 }
 .snapshot-mask {
   flex: 1 1 auto;
