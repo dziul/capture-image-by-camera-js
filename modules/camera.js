@@ -134,13 +134,15 @@ export const canvasToBlob = (canvasElement) => {
     const sizeBytes = bytesArraySource.length;
     const blob = new Blob([Uint8Array.from(bytesArraySource)], { type: mimeType });
     const extension = mimeType.split('/').pop();
-    const file = blobToFile(blob, `${getId()}.${extension}`);
+    const filename = `${getId()}.${extension}`;
+    const file = blobToFile(blob, filename);
     resolve({
       width,
       height,
       dataUrl,
       sizeBytes,
       file,
+      filename,
       mimeType,
       sizeMegaBytes: sizeBytes / Math.pow(1024, 2),
       blobUrl: window.URL.createObjectURL(blob),
