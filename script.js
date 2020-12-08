@@ -41,7 +41,6 @@ const onClick = () => {
   console.log(hasSnaped);
   if (hasSnaped) {
     changeElementSnapshotPreviewAriaHidden(true);
-    window.URL.revokeObjectURL();
     return changeButtonSnapShot();
   }
 
