@@ -1,25 +1,56 @@
-import { loadCamera, snapShot, snapshotResize } from './modules/camera.js';
+import { loadCamera, snapShot, closeCamera } from './modules/camera.js';
 import alert from './modules/alert.js';
 
 const buttonLoad = document.querySelector('.button-load');
 const buttonLoadBack = document.querySelector('.button-load-back');
+const buttonCloseCamera = document.querySelector('.button-close');
 const buttonSnapShot = document.querySelector('.button-snap');
 const elementVideo = document.querySelector('.snapshot-video');
-const elementSnapshotContainer = document.querySelector('.snapshot');
+const elementSnapshotPreview = document.querySelector('.snapshot-preview');
 
+let hasSnaped = false;
+
+const optionsLoadError = { id: 'alert', timeout: 5000 };
 const loadError = (error) => {
-  const options = { id: 'alert', timeout: 5000 };
   switch (error) {
     case 'NotSupportMediaDevicesError':
-      alert(`[${error}]Nao tem suporte`, options);
+      alert(`[${error}]Nao tem suporte`, optionsLoadError);
       break;
     case 'NotAllowedError':
-      alert(`[${error}]camera bloqueada`, options);
+      alert(`[${error}]camera bloqueada`, optionsLoadError);
       break;
     default:
-      alert(`[${error}]algo deu errado`, options);
+      alert(`[${error}]algo deu errado`, optionsLoadError);
       break;
   }
+};
+
+const changeElementSnapshotPreviewAriaHidden = (hidden) => {
+  elementSnapshotPreview.setAttribute('aria-hidden', hidden);
+};
+
+const changeButtonSnapShot = () => {
+  const attrTextNext = 'data-next-text';
+  const previousText = buttonSnapShot.textContent;
+  buttonSnapShot.textContent = buttonSnapShot.getAttribute(attrTextNext);
+  buttonSnapShot.setAttribute(attrTextNext, previousText);
+  hasSnaped = !hasSnaped;
+};
+
+const onClick = () => {
+  console.log(hasSnaped);
+  if (hasSnaped) {
+    changeElementSnapshotPreviewAriaHidden(true);
+    return changeButtonSnapShot();
+  }
+
+  snapShot(elementVideo, 1920, 1080).then((response) => {
+    changeButtonSnapShot();
+    console.log('snapShot', response);
+    alert(`<a href="${response.blobUrl}" target="_blank">image generated</a>`, optionsLoadError);
+    elementSnapshotPreview.style.backgroundImage = `url(${response.blobUrl})`;
+    changeElementSnapshotPreviewAriaHidden(false);
+  });
 };
 
 buttonLoad.addEventListener('click', () => {
@@ -32,12 +63,5 @@ buttonLoadBack.addEventListener('click', () => {
     loadError(error);
   });
 });
-
-const onClick = () => {
-  const image = document.createElement('img');
-  const imageAlt = document.createElement('img');
-  image.src = snapshotResize(elementVideo, 1920, 1080);
-  imageAlt.src = snapShot(elementVideo, 480, 400);
-};
-
 buttonSnapShot.addEventListener('click', onClick);
+buttonCloseCamera.addEventListener('click', closeCamera);
