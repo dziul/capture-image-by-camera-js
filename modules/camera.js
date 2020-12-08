@@ -1,5 +1,4 @@
 import alert from './alert.js';
-import removeNode from './removeNode.js';
 
 //ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 const ID = (+new Date()).toString(36);
@@ -17,7 +16,7 @@ const alertOptions = {
 };
 
 const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
-
+let streamed = {};
 /**
  *
  * @param {HTMLVideoElement} videoElement
@@ -41,7 +40,14 @@ export const loadCamera = (videoElement, constraints, reject) => {
     constraints = constraintsDefault;
   }
 
-  console.log('constraints:', constraints); //debug
+  console.log('constraints', constraints);
+
+  //fechar camera, caso esteja ativa
+  if ('getTracks' in streamed) {
+    streamed.getTracks().forEach((track) => {
+      track.stop();
+    });
+  }
 
   //permission, support
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -49,10 +55,12 @@ export const loadCamera = (videoElement, constraints, reject) => {
   }
 
   alert('carregando câmera...', alertOptions);
+
   navigator.mediaDevices
     .getUserMedia(constraints)
     .then((stream) => {
       console.log('stream', stream);
+      streamed = stream;
       const attrDataId = 'data-video';
       if (!videoElement.getAttribute(attrDataId)) {
         videoElement.setAttribute(attrDataId, ID);
