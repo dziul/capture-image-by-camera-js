@@ -8,7 +8,6 @@ const constraintsDefault = {
     facingMode: 'user', //ou a traseira 'environment'
     width: { min: 1024, ideal: 1920, max: 3840 },
     height: { min: 576, ideal: 1080, max: 2160 },
-    angleRotation: 90,
   },
 };
 
