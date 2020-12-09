@@ -47,11 +47,17 @@ const onClick = () => {
     return changeButtonSnapShot();
   }
 
-  snapShot(elementVideo).then((response) => {
+  snapShot(elementVideo).then((data) => {
+    console.log('snapShot', data);
     changeButtonSnapShot();
-    console.log('snapShot', response);
-    alert(`<a href="${response.blobUrl}" target="_blank">${response.filename}</a>`, optionsLoadError);
-    elementSnapshotPreview.style.backgroundImage = `url(${response.blobUrl})`;
+
+    data.forEach((item) => {
+      if (typeof item === 'object' && 'orientation' in item) {
+        alert(`<a href="${item.blobUrl}" target="_blank">image ${item.orientation}</a>`, optionsLoadError);
+      }
+    });
+
+    elementSnapshotPreview.style.backgroundImage = `url(${data[0].blobUrl})`;
     changeElementSnapshotPreviewAriaHidden(false);
   });
 };
