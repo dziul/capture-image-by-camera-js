@@ -123,7 +123,7 @@ export const snapShot = (videoElement) => {
   const landscape = canvasToBlob(canvas);
   const portrait = canvasToBlob(canvasRotate(canvas, videoElement));
   const orientation = cameraHeight > cameraWidth ? 'portrait' : 'landscape';
-  return Promise.all([orientation, landscape, portrait]);
+  return Promise.all([landscape, portrait, orientation]);
 };
 
 export const blobToFile = (blob, filename) => {
