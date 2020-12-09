@@ -1,5 +1,5 @@
 import alert from './alert.js';
-import { hash } from './uniqueId.js';
+import uuid from './uniqueId.js';
 
 //ref https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
 const constraintsDefault = {
@@ -19,11 +19,12 @@ const alertOptions = {
 const isHTMLVideoElement = (element) => element instanceof HTMLVideoElement;
 
 const mimeType = 'image/jpeg';
-const getId = () => hash(6, 3);
+const getId = () => uuid(12);
 
 let streamed = {};
 let videoElementClass = '';
-let widthCamera, heightCamera;
+let cameraWidth, cameraHeight;
+
 //fechar camera, caso esteja ativa
 export const closeCamera = () => {
   if ('getTracks' in streamed) {
@@ -81,9 +82,9 @@ export const loadCamera = (videoElement, constraints, reject) => {
         // possibilidade de usar events
         videoElement.addEventListener('loadeddata', (event) => {
           alert('loadeddata', alertOptions);
-          widthCamera = event.target.clientWidth;
-          heightCamera = event.target.clientHeight;
-          alert(`width: ${widthCamera}, height: ${heightCamera}`, alertOptions);
+          cameraWidth = event.target.clientWidth;
+          cameraHeight = event.target.clientHeight;
+          alert(`width: ${cameraWidth}, height: ${cameraHeight}`, alertOptions);
           event.target.setAttribute('class', videoElementClass);
         });
         videoElement.addEventListener('loadedmetadata', () => {
@@ -105,18 +106,24 @@ export const loadCamera = (videoElement, constraints, reject) => {
     });
 };
 
+//dispara apenas quando a camera está ativa
+//cameraHeight e cameraWidth é setado apenas quando a camera é carregada
 export const snapShot = (videoElement) => {
   if (!isHTMLVideoElement(videoElement)) {
     return null;
   }
 
   const canvas = document.createElement('canvas');
-  canvas.height = heightCamera;
-  canvas.width = widthCamera;
   const context = canvas.getContext('2d');
 
-  context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-  return canvasToBlob(canvas);
+  canvas.height = cameraHeight;
+  canvas.width = cameraWidth;
+  context.drawImage(videoElement, 0, 0);
+
+  const landscape = canvasToBlob(canvas);
+  const portrait = canvasToBlob(canvasRotate(canvas, videoElement));
+  const orientation = cameraHeight > cameraWidth ? 'portrait' : 'landscape';
+  return Promise.all([orientation, landscape, portrait]);
 };
 
 export const blobToFile = (blob, filename) => {
@@ -137,7 +144,9 @@ export const canvasToBlob = (canvasElement) => {
     const extension = mimeType.split('/').pop();
     const filename = `${getId()}.${extension}`;
     const file = blobToFile(blob, filename);
+    const orientation = height > width ? 'portrait' : 'landscape';
     resolve({
+      orientation,
       width,
       height,
       dataUrl,
@@ -149,6 +158,19 @@ export const canvasToBlob = (canvasElement) => {
       blobUrl: window.URL.createObjectURL(blob),
     });
   });
+};
+
+export const canvasRotate = (canvasElement, videoElement) => {
+  const context = canvasElement.getContext('2d');
+  canvasElement.height = cameraWidth;
+  canvasElement.width = cameraHeight;
+
+  context.save();
+  context.translate(cameraHeight, cameraWidth / cameraHeight);
+  context.rotate(Math.PI / 2);
+  context.drawImage(videoElement, 0, 0);
+  context.restore();
+  return canvasElement;
 };
 
 //[ref] https://gist.github.com/VMBindraban/1be9cd5eceb347bef860
